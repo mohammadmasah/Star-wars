@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
+import { StarshipList } from './components/starship-list/starship-list';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [StarshipList],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
