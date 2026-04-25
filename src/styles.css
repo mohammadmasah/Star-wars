@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+.custom-clean-grid {
+    --ag-row-height: 54px;
+    --ag-header-height: 50px;
+    --ag-font-size: 15px;
+    --ag-border-color: #e5e7eb;
+    --ag-cell-horizontal-border: 1px solid #f3f4f6;
+    --ag-header-background-color: #f8fafc;
+    
+}

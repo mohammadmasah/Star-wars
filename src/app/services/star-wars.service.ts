@@ -9,9 +9,9 @@ import { Starship } from '../models/starship.model';
 export class StarWarsService {
 
   private http = inject(HttpClient);
-  private apiUrl = 'https://swapi.info/api/starships';
+  private apiUrl = 'https://swapi.py4e.com/api/starships/';
 
-  getStarships(): Observable<Starship[]> {
-    return this.http.get<Starship[]>(this.apiUrl);
+  getStarships(page: number = 1): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?page=${page}`);
   }
 }
