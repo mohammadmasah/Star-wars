@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StarWarsService } from '../../services/star-wars.service';
-import { Starship } from '../../models/starship.model';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, IDatasource, IGetRowsParams } from 'ag-grid-community';
 import { timer, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-starship-list',
@@ -14,6 +13,7 @@ import { map } from 'rxjs/operators';
   styleUrl: './starship-list.css',
 })
 export class StarshipList {
+
   private swService = inject(StarWarsService);
 
   public rowModelType: 'infinite' = 'infinite';
@@ -36,12 +36,12 @@ export class StarshipList {
       cellClass: 'bg-gray-50 border-r border-gray-200 text-center',
     },
 
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'model', headerName: 'Model', editable: true, flex: 1 },
-    { field: 'manufacturer', headerName: 'Manufacturer', editable: true, flex: 1 },
-    { field: 'crew', headerName: 'Crew', editable: true, flex: 1 },
-    { field: 'passengers', headerName: 'Passengers', editable: true, flex: 1 },
-    { field: 'hyperdrive_rating', headerName: 'Hyperdrive Rating', editable: true, flex: 1 },
+    { field: 'name', headerName: 'Name', flex: 1, headerClass: 'hc-name'},
+    { field: 'model', headerName: 'Model', editable: true, flex: 1, headerClass: 'hc-model'},
+    { field: 'manufacturer', headerName: 'Manufacturer', editable: true, flex: 1, headerClass: 'hc-factory'},
+    { field: 'crew', headerName: 'Crew', editable: true, flex: 1, headerClass: 'hc-users' },
+    { field: 'passengers', headerName: 'Passengers', editable: true, flex: 1, headerClass: 'hc-seat'},
+    { field: 'hyperdrive_rating', headerName: 'Hyperdrive Rating', editable: true, flex: 1, headerClass: 'hc-zap'},
   ];
 
   public defaultColDef: ColDef = {
