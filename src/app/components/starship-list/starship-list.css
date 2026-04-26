@@ -1,0 +1,42 @@
+::ng-deep .custom-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+::ng-deep .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #3b82f6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+::ng-deep .loading-text {
+  color: #2563eb;
+  font-weight: 500;
+  font-family: sans-serif;
+}
+::ng-deep .spinner {
+  border: 4px solid #3b82f6 !important;
+  border-top-color: transparent !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ag-theme-quartz {
+  --ag-grid-size: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .ag-header-cell-text {
+    font-size: 12px;
+  }
+}

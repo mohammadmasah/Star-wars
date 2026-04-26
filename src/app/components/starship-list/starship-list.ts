@@ -4,6 +4,8 @@ import { StarWarsService } from '../../services/star-wars.service';
 import { Starship } from '../../models/starship.model';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, IDatasource, IGetRowsParams } from 'ag-grid-community';
+import { timer, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-starship-list',
@@ -19,6 +21,8 @@ export class StarshipList {
   public maxConcurrentDatasourceRequests = 1;
   public infiniteInitialRowCount = 10;
   showResetModal = false;
+
+  errorMessage: string | null = null;
 
   columnDefs: ColDef[] = [
     {
@@ -49,23 +53,46 @@ export class StarshipList {
   private myDataSource!: IDatasource;
   private gridApi!: any;
   searchQuery: string = '';
+
   onSearch(event: any) {
     this.searchQuery = event.target.value;
     if (this.gridApi) {
       this.gridApi.setGridOption('datasource', this.myDataSource);
     }
   }
-
+  retryLoad(): void {
+    this.errorMessage = null;
+    if (this.gridApi) {
+      this.gridApi.setGridOption('datasource', this.myDataSource);
+    }
+  }
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
+
+    this.gridApi.setGridOption(
+      'overlayLoadingTemplate',
+      `<div class="custom-loader">
+        <div class="spinner"></div>
+        <span class="loading-text">Connecting to Imperial Database...</span>
+      </div>`,
+    );
+    this.gridApi.setGridOption('loading', true);
 
     this.myDataSource = {
       getRows: (getRowsParams: IGetRowsParams) => {
         const page = Math.floor(getRowsParams.startRow / 10) + 1;
+
+        this.gridApi.setGridOption('loading', true);
+
+        const dataRequest$ = this.swService.getStarships(page, this.searchQuery);
+        const minDelayTimer$ = timer(0);
+
         console.log(`Request for page: ${page}`);
 
-        this.swService.getStarships(page, this.searchQuery).subscribe({
-          next: (response) => {
+        forkJoin([dataRequest$, minDelayTimer$]).subscribe({
+          next: ([response, _]) => {
+            this.gridApi.setGridOption('loading', false);
+
             const saveData = localStorage.getItem('starship_edits');
             const edits = saveData ? JSON.parse(saveData) : {};
 
@@ -86,7 +113,8 @@ export class StarshipList {
             getRowsParams.successCallback(finalResults, lastRow);
           },
           error: (error) => {
-            console.error('error', error);
+            this.gridApi.setGridOption('loading', false);
+            this.errorMessage = 'Unable to load data. Please check your connection.';
             getRowsParams.failCallback();
           },
         });
