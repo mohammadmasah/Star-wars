@@ -46,24 +46,41 @@ export class StarshipList {
     sortable: true,
     suppressMovable: false,
   };
+  private myDataSource!: IDatasource;
+  private gridApi!: any;
+  searchQuery: string = '';
+  onSearch(event: any) {
+    this.searchQuery = event.target.value;
+    if (this.gridApi) {
+      this.gridApi.setGridOption('datasource', this.myDataSource);
+    }
+  }
 
   onGridReady(params: GridReadyEvent): void {
-    const myDataSource: IDatasource = {
+    this.gridApi = params.api;
+
+    this.myDataSource = {
       getRows: (getRowsParams: IGetRowsParams) => {
         const page = Math.floor(getRowsParams.startRow / 10) + 1;
         console.log(`Request for page: ${page}`);
 
-        this.swService.getStarships(page).subscribe({
+        this.swService.getStarships(page, this.searchQuery).subscribe({
           next: (response) => {
             const saveData = localStorage.getItem('starship_edits');
             const edits = saveData ? JSON.parse(saveData) : {};
 
-            const finalResults = response.results.map((ship: any) => {
-              if (edits[ship.name]) {
-                return { ...ship, ...edits[ship.name] };
-              }
-              return ship;
+            const filteredByName = response.results.filter((ship: any) => {
+              return ship.name.toLowerCase().includes(this.searchQuery.toLowerCase());
             });
+
+            const finalResults = filteredByName.map((ship: any) => {
+              return edits[ship.name] ? { ...ship, ...edits[ship.name] } : ship;
+            });
+            if (finalResults.length === 0) {
+              this.gridApi.showNoRowsOverlay();
+            } else {
+              this.gridApi.hideOverlay();
+            }
             const lastRow = response.next ? -1 : response.count;
 
             getRowsParams.successCallback(finalResults, lastRow);
@@ -75,7 +92,7 @@ export class StarshipList {
         });
       },
     };
-    params.api.setGridOption('datasource', myDataSource);
+    params.api.setGridOption('datasource', this.myDataSource);
   }
   onCellValueChanged(event: any) {
     const saveData = localStorage.getItem('starship_edits');
