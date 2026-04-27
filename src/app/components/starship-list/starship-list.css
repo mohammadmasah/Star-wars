@@ -19,10 +19,6 @@
   font-weight: 500;
   font-family: sans-serif;
 }
-::ng-deep .spinner {
-  border: 4px solid #3b82f6;
-  border-top-color: transparent;
-}
 
 @keyframes spin {
   to {

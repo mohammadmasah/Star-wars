@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StarWarsService } from '../../services/star-wars.service';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -21,6 +21,9 @@ export class StarshipList {
   public infiniteInitialRowCount = 10;
   public blockLoadDebounceMillis = 100;
   showResetModal = false;
+  public totalRows: number = 0;
+  public isEndOfList: boolean = false;
+  private cdr = inject(ChangeDetectorRef);
 
   errorMessage: string | null = null;
 
@@ -73,6 +76,7 @@ export class StarshipList {
   searchQuery: string = '';
 
   onSearch(event: any) {
+    this.isEndOfList = false;
     this.searchQuery = event.target.value;
     if (this.gridApi) {
       this.gridApi.setGridOption('datasource', this.myDataSource);
@@ -115,6 +119,8 @@ export class StarshipList {
             this.gridApi.setGridOption('loading', false);
             this.isFirstTimeEver = false;
 
+            this.totalRows = response.count;
+
             const saveData = localStorage.getItem('starship_edits');
             const edits = saveData ? JSON.parse(saveData) : {};
 
@@ -130,7 +136,14 @@ export class StarshipList {
             } else {
               this.gridApi.hideOverlay();
             }
-            const lastRow = response.next ? -1 : response.count;
+            const lastRow = response.next ? -1 : getRowsParams.startRow + finalResults.length;
+            const isLastBlock = !response.next;
+            const isScrolledToEnd = getRowsParams.startRow > 0;
+
+            if (isLastBlock && isScrolledToEnd && this.totalRows > 0) {
+              this.isEndOfList = true;
+              this.cdr.detectChanges();
+            }
 
             getRowsParams.successCallback(finalResults, lastRow);
           },
