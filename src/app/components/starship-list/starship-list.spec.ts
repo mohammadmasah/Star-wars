@@ -57,7 +57,7 @@ describe('StarshipList Component', () => {
         passengers: '6',
         hyperdrive_rating: '0.5',
       },
-    };
+    }as unknown as Parameters<typeof component.onCellValueChanged>[0];
 
     component.onCellValueChanged(mockEvent);
 
@@ -77,7 +77,7 @@ describe('StarshipList Component', () => {
   it('should reset isEndOfList to false when search changes', () => {
     component.isEndOfList = true;
 
-    const mockEvent = { target: { value: 'falcon' } };
+    const mockEvent = { target: { value: 'falcon' } } as unknown as Event;
     component.onSearch(mockEvent);
 
     expect(component.isEndOfList).toBe(false);
