@@ -2,9 +2,10 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StarWarsService } from '../../services/star-wars.service';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef, GridReadyEvent, IDatasource, IGetRowsParams } from 'ag-grid-community';
+import { ColDef, GridReadyEvent, IDatasource, IGetRowsParams, GridApi } from 'ag-grid-community';
 import { timer, forkJoin } from 'rxjs';
-
+import { Starship } from '../../models/starship.model';
+import { CellValueChangedEvent } from 'ag-grid-community';
 @Component({
   selector: 'app-starship-list',
   imports: [CommonModule, AgGridAngular],
@@ -15,14 +16,14 @@ export class StarshipList {
   private swService = inject(StarWarsService);
   private isFirstTimeEver = true;
 
-  public rowModelType: 'infinite' = 'infinite';
+  public rowModelType = 'infinite' as const;
   public cacheBlockSize = 10;
   public maxConcurrentDatasourceRequests = 2;
   public infiniteInitialRowCount = 10;
   public blockLoadDebounceMillis = 100;
   showResetModal = false;
-  public totalRows: number = 0;
-  public isEndOfList: boolean = false;
+  public totalRows = 0;
+  public isEndOfList = false;
   private cdr = inject(ChangeDetectorRef);
 
   errorMessage: string | null = null;
@@ -72,12 +73,13 @@ export class StarshipList {
     suppressMovable: false,
   };
   private myDataSource!: IDatasource;
-  private gridApi!: any;
-  searchQuery: string = '';
+  private gridApi!: GridApi;
+  searchQuery = '';
 
-  onSearch(event: any) {
+  onSearch(event: Event) {
+    const target = event.target as HTMLInputElement;
     this.isEndOfList = false;
-    this.searchQuery = event.target.value;
+    this.searchQuery = target.value;
     if (this.gridApi) {
       this.gridApi.setGridOption('datasource', this.myDataSource);
     }
@@ -115,7 +117,7 @@ export class StarshipList {
         console.log(`Request for page: ${page}`);
 
         forkJoin([dataRequest$, minDelayTimer$]).subscribe({
-          next: ([response, _]) => {
+          next: ([response]) => {
             this.gridApi.setGridOption('loading', false);
             this.isFirstTimeEver = false;
 
@@ -124,11 +126,11 @@ export class StarshipList {
             const saveData = localStorage.getItem('starship_edits');
             const edits = saveData ? JSON.parse(saveData) : {};
 
-            const filteredByName = response.results.filter((ship: any) => {
+            const filteredByName = response.results.filter((ship: Starship) => {
               return ship.name.toLowerCase().includes(this.searchQuery.toLowerCase());
             });
 
-            const finalResults = filteredByName.map((ship: any) => {
+            const finalResults = filteredByName.map((ship: Starship) => {
               return edits[ship.name] ? { ...ship, ...edits[ship.name] } : ship;
             });
             if (finalResults.length === 0) {
@@ -147,7 +149,7 @@ export class StarshipList {
 
             getRowsParams.successCallback(finalResults, lastRow);
           },
-          error: (error) => {
+          error: () => {
             this.gridApi.setGridOption('loading', false);
             this.errorMessage = 'Unable to load data. Please check your connection.';
             getRowsParams.failCallback();
@@ -157,7 +159,7 @@ export class StarshipList {
     };
     params.api.setGridOption('datasource', this.myDataSource);
   }
-  onCellValueChanged(event: any) {
+  onCellValueChanged(event: CellValueChangedEvent<Starship>) {
     const saveData = localStorage.getItem('starship_edits');
     const edits = saveData ? JSON.parse(saveData) : {};
 

@@ -18,3 +18,9 @@ export interface Starship {
     edited: string;
     url: string;
 }
+export interface StarshipResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Starship[];
+}

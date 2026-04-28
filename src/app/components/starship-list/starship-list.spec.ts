@@ -3,12 +3,14 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AgGridAngular } from 'ag-grid-angular';
 import { StarshipList } from './starship-list';
 import { StarWarsService } from '../../services/star-wars.service';
+import { StarshipResponse } from '../../models/starship.model';
 import { of } from 'rxjs';
+
 
 describe('StarshipList Component', () => {
   let component: StarshipList;
   let fixture: ComponentFixture<StarshipList>;
-  let mockSwService: any;
+  let mockSwService: Partial<StarWarsService>;
 
   const mockResponse = {
     count: 37,
@@ -28,7 +30,7 @@ describe('StarshipList Component', () => {
 
   beforeEach(async () => {
     mockSwService = {
-      getStarships: () => of(mockResponse),
+      getStarships: () => of(mockResponse as unknown as StarshipResponse)
     };
 
     await TestBed.configureTestingModule({
@@ -46,7 +48,7 @@ describe('StarshipList Component', () => {
   });
 
   it('should save edited cell value to localStorage', () => {
-    const mockEvent = {
+    const mockEvent= {
       data: {
         name: 'Millennium Falcon',
         model: 'YT-1300 f Corellian Freighter',
