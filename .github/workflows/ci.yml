@@ -23,7 +23,7 @@ jobs:
       run: npm install
 
     - name: Run Tests
-      run: npm test -- --watch=false --browsers=ChromeHeadless
+      run: npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox
 
     - name: Build Docker Image
       run: docker build -t star-wars-app .
